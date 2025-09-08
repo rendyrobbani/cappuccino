@@ -1,0 +1,4 @@
+/.*/
+/vendor/
+/src/test/
+.DS_Store
