@@ -74,7 +74,13 @@ class Anggaran
 		return $values;
 	}
 
-	private function write(string $fileName, array $values): void
+	/**
+	 * @param string $fileName
+	 * @param array $values
+	 * @param bool $formatted
+	 * @return void
+	 */
+	private function write(string $fileName, array $values, bool $formatted = false): void
 	{
 		$spreadsheet = new Spreadsheet();
 		$defaultStyle = $spreadsheet->getDefaultStyle();
@@ -87,14 +93,16 @@ class Anggaran
 		$col = 1;
 		foreach (array_keys(self::HEADER) as $header) {
 			$cell = $worksheet->getCell([$col, $row]);
-			$style = $cell->getStyle();
-			$style->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
-			$style->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
-			$style->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
-			$style->getFill()->setFillType(Fill::FILL_SOLID);
-			$style->getFill()->setStartColor(new Color("6d28d9"));
-			$style->getFont()->setBold(true);
-			$style->getFont()->setColor(new Color(Color::COLOR_WHITE));
+			if ($formatted) {
+				$style = $cell->getStyle();
+				$style->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+				$style->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
+				$style->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
+				$style->getFill()->setFillType(Fill::FILL_SOLID);
+				$style->getFill()->setStartColor(new Color("6d28d9"));
+				$style->getFont()->setBold(true);
+				$style->getFont()->setColor(new Color(Color::COLOR_WHITE));
+			}
 
 			$cell->setValue($header);
 			$col++;
@@ -113,8 +121,10 @@ class Anggaran
 						$cell->setValueExplicit($val, DataType::TYPE_STRING);
 						break;
 				}
-				$style = $cell->getStyle();
-				$style->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
+				if ($formatted) {
+					$style = $cell->getStyle();
+					$style->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
+				}
 				$col++;
 			}
 		}
@@ -125,10 +135,11 @@ class Anggaran
 
 	/**
 	 * @param string $fileName
+	 * @param bool $formatted
 	 * @return void
 	 * @throws \Exception
 	 */
-	public function recap(string $fileName): void
+	public function recap(string $fileName, bool $formatted = false): void
 	{
 		$fileName = str_replace("\\", "/", $fileName);
 		$root = substr($fileName, 0, strrpos($fileName, "/"));
@@ -139,6 +150,6 @@ class Anggaran
 		$values = $this->read($fileName);
 		echo "Write : Laporan Anggaran.xlsx";
 		echo PHP_EOL;
-		$this->write("$root/Laporan Anggaran.xlsx", $values);
+		$this->write("$root/Laporan Anggaran.xlsx", $values, $formatted);
 	}
 }
