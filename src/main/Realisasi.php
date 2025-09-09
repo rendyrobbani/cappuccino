@@ -139,9 +139,10 @@ class Realisasi
 	/**
 	 * @param string $fileName
 	 * @param array[] $values
+	 * @param bool $formatted
 	 * @return void
 	 */
-	private function write(string $fileName, array $values): void
+	private function write(string $fileName, array $values, bool $formatted = false): void
 	{
 		$spreadsheet = new Spreadsheet();
 		$defaultStyle = $spreadsheet->getDefaultStyle();
@@ -154,14 +155,16 @@ class Realisasi
 		$col = 1;
 		foreach (self::HEADER as $header) {
 			$cell = $worksheet->getCell([$col, $row]);
-			$style = $cell->getStyle();
-			$style->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
-			$style->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
-			$style->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
-			$style->getFill()->setFillType(Fill::FILL_SOLID);
-			$style->getFill()->setStartColor(new Color("6d28d9"));
-			$style->getFont()->setBold(true);
-			$style->getFont()->setColor(new Color(Color::COLOR_WHITE));
+			if ($formatted) {
+				$style = $cell->getStyle();
+				$style->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+				$style->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
+				$style->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
+				$style->getFill()->setFillType(Fill::FILL_SOLID);
+				$style->getFill()->setStartColor(new Color("6d28d9"));
+				$style->getFont()->setBold(true);
+				$style->getFont()->setColor(new Color(Color::COLOR_WHITE));
+			}
 
 			$cell->setValue($header);
 			$col++;
@@ -183,8 +186,10 @@ class Realisasi
 						$cell->setValueExplicit($val, DataType::TYPE_STRING);
 						break;
 				}
-				$style = $cell->getStyle();
-				$style->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
+				if ($formatted) {
+					$style = $cell->getStyle();
+					$style->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
+				}
 				$col++;
 			}
 		}
@@ -195,10 +200,11 @@ class Realisasi
 
 	/**
 	 * @param string $root
+	 * @param bool $formatted
 	 * @return void
 	 * @throws \Exception
 	 */
-	public function join(string $root): void
+	public function join(string $root, bool $formatted = false): void
 	{
 		$values = [];
 		if (!file_exists($root)) throw new \Exception("File not found");
@@ -214,7 +220,7 @@ class Realisasi
 
 		echo "Write : Laporan Realisasi.xlsx";
 		echo PHP_EOL;
-		$this->write("$root/Laporan Realisasi.xlsx", $values);
+		$this->write("$root/Laporan Realisasi.xlsx", $values, $formatted);
 	}
 
 	/**
