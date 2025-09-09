@@ -5,12 +5,14 @@ namespace RendyRobbani\Cappuccino;
 use PhpOffice\PhpSpreadsheet\Cell\DataType;
 use PhpOffice\PhpSpreadsheet\Reader\Xlsx as XlsxReader;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Style\Alignment;
+use PhpOffice\PhpSpreadsheet\Style\Border;
+use PhpOffice\PhpSpreadsheet\Style\Color;
+use PhpOffice\PhpSpreadsheet\Style\Fill;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx as XlsxWriter;
 
 class Realisasi
 {
-	private const array HEADER = ["Kode SKPD", "Nama SKPD", "Kode Sub SKPD", "Nama Sub SKPD", "Kode Fungsi", "Nama Fungsi", "Kode Sub Fungsi", "Nama Sub Fungsi", "Kode Urusan", "Nama Urusan", "Kode Bidang Urusan", "Nama Bidang Urusan", "Kode Program", "Nama Program", "Kode Kegiatan", "Nama Kegiatan", "Kode Sub Kegiatan", "Nama Sub Kegiatan", "Kode Rekening", "Nama Rekening", "Nomor Dokumen", "Jenis Dokumen", "Jenis Transaksi", "Nomor DPT", "Tanggal Dokumen", "Keterangan Dokumen", "Nilai Realisasi", "Nilai Setoran", "NIP Pegawai", "Nama Pegawai", "Tanggal Simpan", "Nomor SPD", "Periode SPD", "Nilai SPD", "Tahapan SPD", "Nama Sub Tahapan Jadwal", "Tahapan APBD", "Nomor SPP", "Tanggal SPP", "Nomor SPM", "Tanggal SPM", "Nomor SP2D", "Tanggal SP2D", "Tanggal Transfer", "Nilai SP2D"];
-
 	private static Realisasi $instance;
 
 	public static function getInstance(): self
@@ -18,6 +20,54 @@ class Realisasi
 		if (!isset(self::$instance)) self::$instance = new self();
 		return self::$instance;
 	}
+
+	private const array HEADER = [
+		"Kode SKPD",
+		"Nama SKPD",
+		"Kode Sub SKPD",
+		"Nama Sub SKPD",
+		"Kode Fungsi",
+		"Nama Fungsi",
+		"Kode Sub Fungsi",
+		"Nama Sub Fungsi",
+		"Kode Urusan",
+		"Nama Urusan",
+		"Kode Bidang Urusan",
+		"Nama Bidang Urusan",
+		"Kode Program",
+		"Nama Program",
+		"Kode Kegiatan",
+		"Nama Kegiatan",
+		"Kode Sub Kegiatan",
+		"Nama Sub Kegiatan",
+		"Kode Rekening",
+		"Nama Rekening",
+		"Nomor Dokumen",
+		"Jenis Dokumen",
+		"Jenis Transaksi",
+		"Nomor DPT",
+		"Tanggal Dokumen",
+		"Keterangan Dokumen",
+		"Nilai Realisasi",
+		"Nilai Setoran",
+		"NIP Pegawai",
+		"Nama Pegawai",
+		"Tanggal Simpan",
+		"Nomor SPD",
+		"Periode SPD",
+		"Nilai SPD",
+		"Tahapan SPD",
+		"Nama Sub Tahapan Jadwal",
+		"Tahapan APBD",
+		"Nomor SPP",
+		"Tanggal SPP",
+		"Nomor SPM",
+		"Tanggal SPM",
+		"Nomor SP2D",
+		"Tanggal SP2D",
+		"Tanggal Transfer",
+		"Nilai SP2D",
+	];
 
 	private XlsxReader $reader;
 
@@ -94,11 +144,26 @@ class Realisasi
 	private function write(string $fileName, array $values): void
 	{
 		$spreadsheet = new Spreadsheet();
+		$defaultStyle = $spreadsheet->getDefaultStyle();
+		$defaultStyle->getFont()->setName("Aptos Narrow");
+		$defaultStyle->getFont()->setSize(11);
+		$defaultStyle->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
+
 		$worksheet = $spreadsheet->getActiveSheet();
 		$row = 1;
 		$col = 1;
 		foreach (self::HEADER as $header) {
-			$worksheet->getCell([$col, $row])->setValue($header);
+			$cell = $worksheet->getCell([$col, $row]);
+			$style = $cell->getStyle();
+			$style->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+			$style->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
+			$style->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
+			$style->getFill()->setFillType(Fill::FILL_SOLID);
+			$style->getFill()->setStartColor(new Color("6d28d9"));
+			$style->getFont()->setBold(true);
+			$style->getFont()->setColor(new Color(Color::COLOR_WHITE));
+
+			$cell->setValue($header);
 			$col++;
 		}
 
@@ -106,17 +171,20 @@ class Realisasi
 			$row++;
 			$col = 1;
 			foreach ($value as $val) {
+				$cell = $worksheet->getCell([$col, $row]);
 				switch ($col) {
 					case 28 - 1:
 					case 29 - 1:
 					case 35 - 1:
 					case 46 - 1:
-						$worksheet->getCell([$col, $row])->setValueExplicit($val, DataType::TYPE_NUMERIC);
+						$cell->setValueExplicit($val, DataType::TYPE_NUMERIC);
 						break;
 					default:
-						$worksheet->getCell([$col, $row])->setValueExplicit($val, DataType::TYPE_STRING);
+						$cell->setValueExplicit($val, DataType::TYPE_STRING);
 						break;
 				}
+				$style = $cell->getStyle();
+				$style->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
 				$col++;
 			}
 		}
@@ -144,5 +212,34 @@ class Realisasi
 			$values = array_merge($values, $this->read("$root/$fileName"));
 		}
 		$this->write("$root/Laporan Realisasi.xlsx", $values);
+	}
+
+	/**
+	 * @param string $root
+	 * @return void
+	 * @throws \Exception
+	 */
+	public function rename(string $root): void
+	{
+		if (!file_exists($root)) throw new \Exception("File not found");
+		$fileNames = scandir($root);
+		$fileNames = array_filter($fileNames, fn($fileName) => str_ends_with($fileName, ".xlsx"));
+		$fileNames = array_filter($fileNames, fn($fileName) => preg_match("#Laporan Realisasi.*\\.xlsx#", $fileName));
+		sort($fileNames);
+		for ($i = 0; $i < sizeof($fileNames); $i++) {
+			$fileName = $fileNames[$i];
+
+			$number = 1;
+			if (preg_match("#Laporan Realisasi \\((\\d)\\)\\.xlsx#", $fileName, $matches)) {
+				echo $matches[1];
+				echo PHP_EOL;
+				$number = intval($matches[1]) + 1;
+			}
+			$number = str_pad($number, 2, "0", STR_PAD_LEFT);
+
+			$from = "$root/$fileName";
+			$into = "$root/$number. Laporan Realisasi.xlsx";
+			rename($from, $into);
+		}
 	}
 }
