@@ -24,22 +24,22 @@ class Realisasi
 	private const array HEADER = [
 		"Kode SKPD",
 		"Nama SKPD",
-		"Kode Sub SKPD",
-		"Nama Sub SKPD",
+		"Kode Unit SKPD",
+		"Nama Unit SKPD",
 		"Kode Fungsi",
 		"Nama Fungsi",
-		"Kode Sub Fungsi",
-		"Nama Sub Fungsi",
+		"Kode Subfungsi",
+		"Nama Subfungsi",
 		"Kode Urusan",
 		"Nama Urusan",
-		"Kode Bidang Urusan",
-		"Nama Bidang Urusan",
+		"Kode Bidang",
+		"Nama Bidang",
 		"Kode Program",
 		"Nama Program",
 		"Kode Kegiatan",
 		"Nama Kegiatan",
-		"Kode Sub Kegiatan",
-		"Nama Sub Kegiatan",
+		"Kode Subkegiatan",
+		"Nama Subkegiatan",
 		"Kode Rekening",
 		"Nama Rekening",
 		"Nomor Dokumen",
@@ -211,6 +211,9 @@ class Realisasi
 			echo PHP_EOL;
 			$values = array_merge($values, $this->read("$root/$fileName"));
 		}
+
+		echo "Write : Laporan Realisasi.xlsx";
+		echo PHP_EOL;
 		$this->write("$root/Laporan Realisasi.xlsx", $values);
 	}
 
@@ -230,11 +233,7 @@ class Realisasi
 			$fileName = $fileNames[$i];
 
 			$number = 1;
-			if (preg_match("#Laporan Realisasi \\((\\d)\\)\\.xlsx#", $fileName, $matches)) {
-				echo $matches[1];
-				echo PHP_EOL;
-				$number = intval($matches[1]) + 1;
-			}
+			if (preg_match("#Laporan Realisasi \\((\\d)\\)\\.xlsx#", $fileName, $matches)) $number = intval($matches[1]) + 1;
 			$number = str_pad($number, 2, "0", STR_PAD_LEFT);
 
 			$from = "$root/$fileName";
