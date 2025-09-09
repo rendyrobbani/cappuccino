@@ -13,7 +13,7 @@ use PhpOffice\PhpSpreadsheet\Writer\Xlsx as XlsxWriter;
 
 class Realisasi
 {
-	private static Realisasi $instance;
+	private static self $instance;
 
 	public static function getInstance(): self
 	{
