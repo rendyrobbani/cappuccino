@@ -126,7 +126,7 @@ class Realisasi
 					$val = $worksheet->getCell([$col, $row]);
 					$value[] = match ($col) {
 						28, 29, 35, 46 => $this->toNumber($val),
-						26, 32, 40, 44, 45 => $this->toDate($val),
+						26, 32, 40, 42, 44, 45 => $this->toDate($val),
 						default => $val,
 					};
 				}
@@ -234,13 +234,15 @@ class Realisasi
 		$fileNames = scandir($root);
 		$fileNames = array_filter($fileNames, fn($fileName) => str_ends_with($fileName, ".xlsx"));
 		$fileNames = array_filter($fileNames, fn($fileName) => preg_match("#Laporan Realisasi.*\\.xlsx#", $fileName));
-		sort($fileNames);
+		usort($fileNames, function ($a, $b) {
+			if ($a == "Laporan Realisasi.xlsx") $a = "Laporan Realisasi (0).xlsx";
+			if ($b == "Laporan Realisasi.xlsx") $b = "Laporan Realisasi (0).xlsx";
+			return strcmp($a, $b);
+		});
 		for ($i = 0; $i < sizeof($fileNames); $i++) {
 			$fileName = $fileNames[$i];
 
-			$number = 1;
-			if (preg_match("#Laporan Realisasi \\((\\d)\\)\\.xlsx#", $fileName, $matches)) $number = intval($matches[1]) + 1;
-			$number = str_pad($number, 2, "0", STR_PAD_LEFT);
+			$number = str_pad($i + 1, 2, "0", STR_PAD_LEFT);
 
 			$from = "$root/$fileName";
 			$into = "$root/$number. Laporan Realisasi.xlsx";
