@@ -6,7 +6,7 @@ use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Style\Alignment;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx as XlsxWriter;
 
-class Belanja
+class JsonToExcel
 {
 	private static self $instance;
 
@@ -33,7 +33,12 @@ class Belanja
 		$r = 0;
 
 		$rows = json_decode($contents, true);
+		$max = sizeof($rows);
 		for ($i = 0; $i < sizeof($rows); $i++) {
+			$now = $i + 1;
+			echo "\r";
+			echo "Processing : " . ceil($now * 100 / $max) . "%";;
+
 			$row = $rows[$i];
 			if ($i == 0) {
 				$r++;
@@ -47,6 +52,10 @@ class Belanja
 			$c = 1;
 			$r++;
 			foreach ($row as $key => $value) {
+				if (is_string($value)) {
+					$value = str_replace("\n", " ", $value);
+					while (str_contains($value, "  ")) $value = str_replace("  ", " ", $value);
+				}
 				$worksheet->getCell([$c, $r])->setValue($value);
 				$c++;
 			}
