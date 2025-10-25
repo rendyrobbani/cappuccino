@@ -2,6 +2,7 @@
 
 namespace RendyRobbani\Cappuccino;
 
+use PhpOffice\PhpSpreadsheet\Cell\DataType;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Style\Alignment;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx as XlsxWriter;
@@ -56,7 +57,8 @@ class JsonToExcel
 					$value = str_replace("\n", " ", $value);
 					while (str_contains($value, "  ")) $value = str_replace("  ", " ", $value);
 				}
-				$worksheet->getCell([$c, $r])->setValue($value);
+				if (str_starts_with($key, "kode_") || str_starts_with($key, "nama_")) $worksheet->getCell([$c, $r])->setValueExplicit($value, DataType::TYPE_STRING);
+				else $worksheet->getCell([$c, $r])->setValue($value);
 				$c++;
 			}
 		}
